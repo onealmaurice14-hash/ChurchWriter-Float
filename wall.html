@@ -6,40 +6,57 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="config.js"></script><script src="store.js"></script>
 <script>
-const cv=document.getElementById("w"),ctx=cv.getContext("2d"),MAX=40,LANES=4,GAP=90;
-let W,H,D,laneH;
-const lanes=Array.from({length:LANES},(_,i)=>({items:[],off:0,speed:70+i*14+(i%2)*10}));
-function size(){D=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);laneH=Math.min(H*.15,160)}
+const cv=document.getElementById("w"),ctx=cv.getContext("2d");
+const MAX=200,LANES=4,GAP=90,SPEED=0.4;          // SPEED = pixels per frame (at 60fps)
+let W,H,fs,band,mg,rowH,laneH;
+const lanes=Array.from({length:LANES},()=>({items:[]})),order=[];
+
+// Layout: 2 rows above the title, 2 below, with top/bottom margins so nothing is cut off or under the title.
+function geo(){fs=Math.min(W*.1,170);band=fs*1.3;mg=Math.max(30,H*.06);rowH=(H-2*mg-band)/4;laneH=Math.max(20,Math.min(rowH*.82,170))}
+const laneY=i=>i<2?mg+rowH*(i+.5):H/2+band/2+rowH*(i-2+.5);
+function size(){const D=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);ctx.imageSmoothingQuality="high";geo();lanes.forEach(relayout)}
+function relayout(lane){                               // re-pack after a resize so nothing overlaps
+  const its=lane.items.slice().sort((a,b)=>b.x-a.x);if(!its.length)return;
+  const x0=its[0].x;its.forEach(i=>{i.w=Math.min(laneH*i.a,W*.4);i.h=i.w/i.a});
+  let R=x0+its[0].w;its.forEach(i=>{i.x=R-i.w;R=i.x-GAP});
+}
 addEventListener("resize",size);size();
 
-function add(m){const img=new Image();img.onload=()=>{
-  const lane=lanes.reduce((a,b)=>b.items.length<a.items.length?b:a);
-  lane.items.push({id:m.id,img,a:img.width/img.height,born:performance.now()});
-  if(lanes.reduce((t,l)=>t+l.items.length,0)>MAX){const big=lanes.reduce((a,b)=>b.items.length>a.items.length?b:a);big.items.shift()}
-};img.src=m.png}
-const del=m=>lanes.forEach(l=>l.items=l.items.filter(i=>i.id!==m.id));
-Store.list(MAX).then(l=>l.forEach(add));Store.onInsert(add);Store.onDelete(del);
+// New messages join at the front of the queue, just left of the screen, so they appear right away.
+function place(lane,it,initial){
+  const vis=lane.items.filter(i=>i.x+i.w>0),front=vis.length?Math.min(...vis.map(i=>i.x)):(initial?W:0);
+  let x=front-GAP-it.w;if(!initial)x=Math.min(x,-it.w);
+  const gone=lane.items.filter(i=>i.x+i.w<=0);
+  if(gone.length){const need=Math.max(...gone.map(i=>i.x+i.w))-(x-GAP);if(need>0)gone.forEach(i=>i.x-=need)}
+  it.x=x;
+}
+function add(msg,initial){const img=new Image();img.onload=()=>{
+  if(order.some(o=>o.id===msg.id))return;
+  const a=img.width/img.height,lane=lanes.reduce((p,q)=>q.items.length<p.items.length?q:p);
+  const it={id:msg.id,img,a,lane,w:Math.min(laneH*a,W*.4),x:0};it.h=it.w/a;
+  place(lane,it,initial);lane.items.push(it);order.push(it);
+  if(order.length>MAX)drop(order[0]);
+};img.src=msg.png}
+function drop(it){it.lane.items=it.lane.items.filter(i=>i!==it);const k=order.indexOf(it);if(k>=0)order.splice(k,1)}
+const del=msg=>{const it=order.find(o=>o.id===msg.id);if(it)drop(it)};
+Store.list(MAX).then(l=>l.forEach(x=>add(x,true)));Store.onInsert(x=>add(x,false));Store.onDelete(del);
 
 let prev=0;
 function frame(now){
-  const dt=Math.min(.05,(now-prev)/1000||0);prev=now;
+  const dt=Math.min(.05,(now-prev)/1000||0);prev=now;const v=SPEED*60*dt;
   const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.7);g.addColorStop(0,"#1b2040");g.addColorStop(1,"#070810");
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 
   lanes.forEach((lane,li)=>{
-    const n=lane.items.length;if(!n)return;
-    const cy=H*(li+.5)/LANES,ws=lane.items.map(i=>Math.min(laneH*i.a,W*.4));
-    const sum=ws.reduce((t,w)=>t+w,0),pad=Math.max(GAP,(W*1.1-sum)/n),total=sum+pad*n;
-    lane.off=(lane.off+lane.speed*dt)%total;      // moves left to right, loops forever
-    let x=lane.off-total;
-    ctx.save();ctx.imageSmoothingQuality="high";
-    while(x<W){for(let k=0;k<n;k++){const it=lane.items[k],w=ws[k],h=w/it.a;
-      if(x+w>0&&x<W){ctx.globalAlpha=Math.min(1,(now-it.born)/1500);ctx.drawImage(it.img,x,cy-h/2,w,h)}
-      x+=w+pad}}
-    ctx.restore();
+    const cy=laneY(li),its=lane.items;
+    for(const it of its)it.x+=v;                       // moves left to right
+    for(const it of its)if(it.x>W){                    // left the screen: go to the back of the queue
+      let mn=Infinity;for(const o of its)if(o!==it&&o.x<mn)mn=o.x;
+      it.x=Math.min((mn===Infinity?0:mn)-GAP-it.w,-it.w);
+    }
+    for(const it of its)if(it.x+it.w>0&&it.x<W)ctx.drawImage(it.img,it.x,cy-it.h/2,it.w,it.h);
   });
 
-  const fs=Math.min(W*.1,170);
   ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";ctx.font=`italic 600 ${fs}px "Cormorant Garamond",Georgia,serif`;
   ctx.shadowColor="#f3d98b";ctx.shadowBlur=40;ctx.fillStyle="#fffaf0";ctx.fillText("Before I am",W/2,H/2);ctx.restore();
   requestAnimationFrame(frame);
