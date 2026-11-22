@@ -59,18 +59,18 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 const PENS=[["solid","Pen"],["brush","Brush"],["pencil","Pencil"],["marker","Marker"],["spray","Spray"],["calligraphy","Calligraphy"],["neon","Neon"],["eraser","Eraser"]];
 const SHAPES=[["line","Line","╱"],["rect","Rectangle","▭"],["ellipse","Circle","◯"],["triangle","Triangle","△"],["star","Star","☆"],["heart","Heart","♡"],["arrow","Arrow","➜"]];
 const PRESETS=["#ffffff","#f3d98b","#ff6b6b","#5ec8ff","#7ee081","#b69cff"];
-const C="style=\"fill:var(--c)\"";
+const PC="style=\"fill:var(--c)\"";
 const TIPS={
  solid:'<path d="M16 44 L22 6 L28 44Z" fill="#d9dbe8"/><path d="M20.4 20 L22 6 L23.6 20Z" fill="#2a2d44"/>',
- brush:`<path d="M15 44 C15 26 19 14 22 4 C25 14 29 26 29 44Z" ${C}/>`,
+ brush:`<path d="M15 44 C15 26 19 14 22 4 C25 14 29 26 29 44Z" ${PC}/>`,
  pencil:'<path d="M14 44 L22 12 L30 44Z" fill="#e8c28a"/><path d="M19.6 24 L22 12 L24.4 24Z" fill="#33364d"/>',
- marker:`<path d="M13 44 L16 24 L28 24 L31 44Z" fill="#cfd2e1"/><path d="M16 24 L19 10 L25 10 L28 24Z" ${C}/>`,
- spray:`<rect x="16" y="26" width="12" height="18" rx="2" fill="#b9bccd"/><rect x="19" y="18" width="6" height="8" rx="1" fill="#8f93aa"/><circle cx="16" cy="10" r="1.7" ${C}/><circle cx="22" cy="5" r="1.7" ${C}/><circle cx="28" cy="10" r="1.7" ${C}/>`,
+ marker:`<path d="M13 44 L16 24 L28 24 L31 44Z" fill="#cfd2e1"/><path d="M16 24 L19 10 L25 10 L28 24Z" ${PC}/>`,
+ spray:`<rect x="16" y="26" width="12" height="18" rx="2" fill="#b9bccd"/><rect x="19" y="18" width="6" height="8" rx="1" fill="#8f93aa"/><circle cx="16" cy="10" r="1.7" ${PC}/><circle cx="22" cy="5" r="1.7" ${PC}/><circle cx="28" cy="10" r="1.7" ${PC}/>`,
  calligraphy:'<path d="M14 44 L22 6 L30 44 Q22 38 14 44Z" fill="#d6bb6f"/><path d="M22 14 L22 36" stroke="#2a2d44" stroke-width="1.4"/>',
- neon:`<circle cx="22" cy="14" r="11" style="fill:var(--c);opacity:.35"/><path d="M17 44 L22 12 L27 44Z" fill="#d9dbe8"/><circle cx="22" cy="12" r="3.5" ${C}/>`,
+ neon:`<circle cx="22" cy="14" r="11" style="fill:var(--c);opacity:.35"/><path d="M17 44 L22 12 L27 44Z" fill="#d9dbe8"/><circle cx="22" cy="12" r="3.5" ${PC}/>`,
  eraser:''};
 function penSVG(k){const body=k==="eraser"?'<rect x="10" y="26" width="24" height="98" rx="5" fill="url(#bd)"/><rect x="10" y="26" width="24" height="24" rx="5" fill="#f1a7b4"/>'
-  :`<rect x="10" y="44" width="24" height="80" rx="4" fill="url(#bd)"/><rect x="10" y="44" width="24" height="9" ${C}/>`;
+  :`<rect x="10" y="44" width="24" height="80" rx="4" fill="url(#bd)"/><rect x="10" y="44" width="24" height="9" ${PC}/>`;
   return`<svg viewBox="0 0 44 120" aria-hidden="true">${body}${TIPS[k]}</svg>`}
 let tool="solid",color="#fff4d6",size=6,fill=false,hist=[],hi=-1,drawing=false,pid=null,base,pts=[],start,last,lastT,lw,moved=false,H=.12,S=.16,V=1,popFor=null;
 const isShape=()=>SHAPES.some(s=>s[0]===tool);
