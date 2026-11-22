@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Before I am</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@500;600&display=swap" rel="stylesheet">
+<style>html,body{margin:0;height:100%;background:#0d1020;overflow:hidden;cursor:none}canvas{display:block;width:100vw;height:100vh}</style></head><body>
+<canvas id="w"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script><script src="store.js"></script>
+<script>
+const cv=document.getElementById("w"),ctx=cv.getContext("2d"),MAX=40,GAP=60;
+let W,H,D,sprites=[],strip=[],off=0;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function size(){D=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0)}
+addEventListener("resize",size);size();
+const stripH=()=>Math.max(70,H*.1);
+function add(m){const img=new Image();img.onload=()=>{
+  const h=Math.min(H*.2,200),sc=h/img.height,a=img.width/img.height;
+  sprites.push({id:m.id,img,w:img.width*sc,h,x:rnd(0,W*.85),y:rnd(H*.05,H*.7),vx:rnd(-.35,.35)||.2,vy:rnd(-.25,.25)||.15,r:rnd(-.15,.15),vr:rnd(-.0005,.0005),born:performance.now()});
+  if(sprites.length>MAX)sprites.shift();
+  strip.push({id:m.id,img,a});if(strip.length>MAX)strip.shift();
+};img.src=m.png}
+const del=m=>{sprites=sprites.filter(s=>s.id!==m.id);strip=strip.filter(s=>s.id!==m.id)};
+Store.list(MAX).then(l=>l.forEach(add));Store.onInsert(add);Store.onDelete(del);
+function frame(now){
+  const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.7);g.addColorStop(0,"#1b2040");g.addColorStop(1,"#070810");
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const sh=stripH(),floor=H-sh;
+  for(const s of sprites){
+    s.x+=s.vx;s.y+=s.vy;s.r+=s.vr;
+    if(s.x<0||s.x+s.w>W)s.vx*=-1;if(s.y<20||s.y+s.h>floor-10)s.vy*=-1;
+    ctx.save();ctx.globalAlpha=Math.min(1,(now-s.born)/1800);ctx.shadowColor="#f3d98b";ctx.shadowBlur=14;
+    ctx.translate(s.x+s.w/2,s.y+s.h/2);ctx.rotate(s.r);ctx.drawImage(s.img,-s.w/2,-s.h/2,s.w,s.h);ctx.restore();
+  }
+  // marquee strip
+  ctx.fillStyle="#0d1020dd";ctx.fillRect(0,floor,W,sh);ctx.fillStyle="#f3d98b55";ctx.fillRect(0,floor,W,1);
+  if(strip.length){
+    const ih=sh*.7,items=strip.map(s=>({s,w:ih*s.a})),total=items.reduce((t,i)=>t+i.w+GAP,0);
+    off=(off+1.2)%total;let x=-off;
+    while(x<W){for(const i of items){if(x+i.w>0&&x<W)ctx.drawImage(i.s.img,x,floor+(sh-ih)/2,i.w,ih);x+=i.w+GAP}if(total<=0)break}
+  }
+  // centered overlay, always last
+  ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.font=`italic 600 ${Math.min(W*.1,170)}px "Cormorant Garamond",Georgia,serif`;
+  ctx.shadowColor="#f3d98b";ctx.shadowBlur=40;ctx.fillStyle="#fffaf0";ctx.fillText("Before I am",W/2,floor/2);ctx.restore();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+addEventListener("click",()=>document.documentElement.requestFullscreen?.());
+</script></body></html>

@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin</title>
+<style>body{font-family:Georgia,serif;background:#0d1020;color:#f3d98b;margin:0;padding:20px}
+#g{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.c{background:#161a33;border-radius:6px;padding:8px;text-align:center}.c img{max-width:100%;max-height:110px}
+button,input{font:inherit;padding:8px 12px;border-radius:4px;border:1px solid #f3d98b;background:none;color:#f3d98b}</style></head><body>
+<h2>Messages on the wall</h2><div id="login" hidden><input id="e" type="email" placeholder="Admin email"> <input id="p" type="password" placeholder="Password"> <button id="in">Sign in</button></div>
+<div id="g"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script><script src="store.js"></script>
+<script>
+const g=document.getElementById("g");
+async function load(){g.innerHTML="";(await Store.list(200)).reverse().forEach(m=>{const d=document.createElement("div");d.className="c";d.innerHTML=`<img src="${m.png}" alt="Message"><br><button>Delete</button>`;d.querySelector("button").onclick=async()=>{await Store.remove(m.id);d.remove()};g.append(d)})}
+(async()=>{
+  if(!Store.live)return load();
+  const {data}=await Store.sb.auth.getSession();
+  if(data.session)return load();
+  const l=document.getElementById("login");l.hidden=false;
+  document.getElementById("in").onclick=async()=>{const {error}=await Store.sb.auth.signInWithPassword({email:e.value,password:p.value});error?alert(error.message):(l.hidden=true,load())};
+})();
+</script></body></html>
