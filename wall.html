@@ -32,7 +32,7 @@ function frame(now){
     const sum=ws.reduce((t,w)=>t+w,0),pad=Math.max(GAP,(W*1.1-sum)/n),total=sum+pad*n;
     lane.off=(lane.off+lane.speed*dt)%total;      // moves left to right, loops forever
     let x=lane.off-total;
-    ctx.save();ctx.shadowColor="#f3d98b";ctx.shadowBlur=12;
+    ctx.save();ctx.imageSmoothingQuality="high";
     while(x<W){for(let k=0;k<n;k++){const it=lane.items[k],w=ws[k],h=w/it.a;
       if(x+w>0&&x<W){ctx.globalAlpha=Math.min(1,(now-it.born)/1500);ctx.drawImage(it.img,x,cy-h/2,w,h)}
       x+=w+pad}}
