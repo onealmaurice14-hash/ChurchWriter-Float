@@ -45,6 +45,6 @@ $("save").onclick=async()=>{
   const s=Math.min(1,700/w),o=document.createElement("canvas");o.width=Math.round(w*s);o.height=Math.round(h*s);
   o.getContext("2d").drawImage(t,0,0,o.width,o.height);
   try{await Store.add(o.toDataURL("image/png"));$("toast").classList.add("on");setTimeout(()=>{$("toast").classList.remove("on");reset()},1800)}
-  catch(err){alert("Could not send. Check the WiFi and try again.");$("save").disabled=false}
+  catch(err){console.error(err);alert("Could not send.\n"+(err&&err.message?err.message:err)+(err&&err.hint?"\n"+err.hint:""));$("save").disabled=false}
 };
 </script></body></html>
