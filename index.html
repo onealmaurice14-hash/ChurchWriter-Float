@@ -1,215 +1,338 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<meta name="color-scheme" content="dark"><title>Write your message</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
-<style>
-:root{--night:#0d1020;--gold:#f3d98b;--c:#1b2340;color-scheme:dark}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--night);color:var(--gold);font-family:"Cormorant Garamond",Georgia,serif;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
-body{display:flex;flex-direction:column;gap:10px;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom))}
-h1{margin:0;font-size:clamp(22px,4vw,38px);font-style:italic;font-weight:500;text-align:center}
-button{font:inherit;color:var(--gold)}
-#paper{flex:1;min-height:140px;position:relative;background:#f4ecd8 center/100% 100% no-repeat;border-radius:4px;box-shadow:0 10px 36px #000a,0 0 0 1px #00000040}
-canvas#c{width:100%;height:100%;display:block;touch-action:none;border-radius:4px}
-#hint{position:absolute;inset:0;display:grid;place-items:center;color:#5a46288c;font-size:clamp(22px,4vw,34px);font-style:italic;pointer-events:none}
-#dock{position:relative}
-#tray{display:flex;align-items:flex-end;gap:8px;height:98px;overflow-x:auto;overflow-y:hidden;padding:0 12px;background:linear-gradient(#1a2044,#12172f);border:1.5px solid #f3d98b44;border-radius:18px;scrollbar-width:none;touch-action:pan-x}
-#tray::-webkit-scrollbar{display:none}#tray>:first-child{margin-left:auto}#tray>:last-child{margin-right:auto}
-.pen{flex:none;width:46px;height:120px;margin-bottom:-44px;padding:0;border:0;background:none;transition:transform .18s;transform-origin:bottom center;cursor:pointer}
-.pen.on{transform:translateY(-18px)}.pen svg{width:100%;height:100%;display:block;overflow:visible}
-.tile{flex:none;align-self:center;display:grid;place-items:center;min-width:58px;height:58px;padding:0 8px;border-radius:14px;border:1.5px solid #f3d98b66;background:none;font-size:15px;line-height:1.1}
-.tile b{display:block;font-size:22px;font-weight:500}.tile.on{background:var(--gold);color:var(--night)}
-.ctile{flex:none;align-self:center;position:relative;width:50px;height:50px;border-radius:50%;border:0;padding:0;background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
-.ctile::after{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--c);border:2px solid #0d1020}
-#pop{position:absolute;bottom:calc(100% + 10px);z-index:5;width:min(300px,100%);padding:14px;background:#171c3b;border:1.5px solid #f3d98b66;border-radius:18px;box-shadow:0 12px 40px #000b}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F7E7D2">
+  <title>Write your message</title>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+:root{
+  --terra:#D95D39;
+  --terra-deep:#BE4A28;
+  --apricot:#F0A86E;
+  --cream:#F7E7D2;
+  --sage:#7A9B76;
+  --sage-deep:#5F7E5B;
+  --ink:#2F3A2F;
+  --line:rgba(47,58,47,.22);
+  --c:#2F3A2F;
+  color-scheme:light
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;color:var(--ink);font-family:"Atkinson Hyperlegible",Arial,sans-serif;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+body{display:flex;flex-direction:column;gap:12px;padding:max(12px,env(safe-area-inset-top)) 14px max(12px,env(safe-area-inset-bottom));
+  background:
+    radial-gradient(900px 620px at 88% -8%,rgba(240,168,110,.5),transparent 62%),
+    radial-gradient(820px 560px at -12% 34%,rgba(122,155,118,.32),transparent 58%),
+    radial-gradient(760px 680px at 52% 112%,rgba(217,93,57,.24),transparent 62%),
+    linear-gradient(180deg,#FAF0E3,#F7E7D2)}
+h1{margin:0;font-size:clamp(24px,4.5vw,40px);font-weight:700;text-align:center;letter-spacing:.01em;animation:rise .55s ease both}
+button{font:inherit;color:var(--ink)}
+
+#paper{flex:1;min-height:140px;position:relative;background:#f4ecd8 center/100% 100% no-repeat;border-radius:12px;
+  box-shadow:0 14px 40px rgba(47,58,47,.16),0 0 0 1px rgba(47,58,47,.08);animation:rise .6s .06s ease both}
+canvas#c{width:100%;height:100%;display:block;touch-action:none;border-radius:12px}
+#hint{position:absolute;inset:0;display:grid;place-items:center;color:#6e5f4e;font-size:clamp(20px,3.6vw,30px);pointer-events:none}
+
+#tray,#pop,.row button:not(.go){
+  background:rgba(255,255,255,.6);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  backdrop-filter:blur(18px) saturate(150%);
+  border:1.5px solid rgba(255,255,255,.9);
+  box-shadow:0 10px 30px rgba(47,58,47,.14),inset 0 1px 0 rgba(255,255,255,.85)}
+
+#dock{position:relative;animation:rise .6s .12s ease both}
+#tray{display:flex;align-items:flex-end;gap:8px;height:98px;overflow-x:auto;overflow-y:hidden;padding:0 12px;border-radius:22px;scrollbar-width:none;touch-action:pan-x}
+#tray::-webkit-scrollbar{display:none}
+#tray>:first-child{margin-left:auto}#tray>:last-child{margin-right:auto}
+.pen{flex:none;width:46px;height:120px;margin-bottom:-44px;padding:0;border:0;background:none;cursor:pointer;transform-origin:bottom center;transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.pen svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 2px 3px rgba(47,58,47,.3))}
+.pen.on{transform:translateY(-16px) scale(1.06);animation:pen-pop .5s cubic-bezier(.34,1.56,.64,1)}
+.pen.on svg{filter:drop-shadow(0 8px 12px rgba(217,93,57,.42))}
+.tile{flex:none;align-self:center;display:grid;place-items:center;min-width:60px;height:60px;padding:0 8px;border-radius:16px;border:2px solid var(--line);font-size:16px;line-height:1.15;transition:background .2s,border-color .2s}
+.tile b{display:block;font-size:24px}
+.tile.on{background:var(--apricot);border-color:var(--terra);font-weight:700}
+.ctile{flex:none;align-self:center;position:relative;width:54px;height:54px;border-radius:50%;border:0;padding:0;background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);box-shadow:0 4px 12px rgba(47,58,47,.25),0 0 0 3px rgba(255,255,255,.85)}
+.ctile::after{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--c);border:2px solid var(--ink)}
+
+#pop{position:absolute;bottom:calc(100% + 10px);z-index:5;width:min(320px,100%);padding:16px;border-radius:20px;
+  background:rgba(255,255,255,.8);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+  transform-origin:bottom center;animation:pop-in .34s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 18px 50px rgba(47,58,47,.24),inset 0 1px 0 rgba(255,255,255,.9)}
 #pop[hidden],#pop section[hidden]{display:none}
-.ph{font-size:22px;font-style:italic;margin-bottom:8px}
-.sl{display:flex;align-items:center;gap:12px}.sl input{flex:1;accent-color:var(--gold)}
+.ph{font-size:21px;font-weight:700;margin-bottom:10px}
+.sl{display:flex;align-items:center;gap:12px}
+.sl input{flex:1;accent-color:var(--terra);height:28px}
 .dot{flex:none;display:block;border-radius:50%;background:var(--c);min-width:6px;min-height:6px}
+
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.chip{min-height:44px;padding:6px 14px;font-size:19px;border-radius:12px;border:1.5px solid #f3d98b88;background:none;white-space:nowrap}.chip.on{background:var(--gold);color:var(--night)}
-.grid .chip{padding:4px;text-align:center;font-size:15px}.grid .chip b{display:block;font-size:24px;font-weight:500}
-#wheel{display:block;margin:0 auto 12px;width:220px;height:220px;border-radius:50%;touch-action:none}
-#bright{-webkit-appearance:none;appearance:none;width:100%;height:16px;border-radius:8px;background:var(--bg);margin:0 0 10px;touch-action:none}
-#bright::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #0d1020;box-shadow:0 0 0 1.5px #fff}
-#bright::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #0d1020}
-#rgb{text-align:center;font-size:20px;margin-bottom:10px;white-space:pre}
-#presets{display:flex;justify-content:center;gap:10px}
-.sw{width:34px;height:34px;border-radius:50%;border:2px solid #ffffff33;padding:0}.sw.on{border-color:#fff;box-shadow:0 0 0 2px #171c3b,0 0 0 4px #fff}
-.row{display:flex;gap:8px}.row button{flex:1;min-height:52px;font-size:clamp(20px,3.5vw,28px);border-radius:10px;border:2px solid var(--gold);background:none}
-.row .go{flex:2;background:var(--gold);color:var(--night);font-weight:600}.row button:disabled{opacity:.35}
-button:focus-visible{outline:3px solid #fff;outline-offset:2px}
-#toast{position:fixed;inset:0;display:grid;place-items:center;background:#0d1020ee;font-size:clamp(34px,7vw,64px);font-style:italic;opacity:0;pointer-events:none;transition:opacity .4s}#toast.on{opacity:1}
-</style></head><body>
-<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="bd" x1="0" x2="1"><stop offset="0" stop-color="#f4f5fa"/><stop offset=".55" stop-color="#d3d6e4"/><stop offset="1" stop-color="#aeb2c6"/></linearGradient></defs></svg>
-<h1>Write your message</h1>
-<div id="paper"><canvas id="c"></canvas><div id="hint">write or draw here</div></div>
-<div id="dock">
-  <div id="pop" hidden>
-    <section id="p-size" hidden><div class="ph" id="pname"></div><div class="sl"><span class="dot" id="sdot"></span><input type="range" class="sz" min="2" max="40" value="6" aria-label="Size"></div></section>
-    <section id="p-shapes" hidden><div class="grid" id="sgrid"></div><div class="sl"><span class="dot sdot2"></span><input type="range" class="sz" min="2" max="40" value="6" aria-label="Size"><button class="chip" id="fillb">Fill</button></div></section>
-    <section id="p-color" hidden><canvas id="wheel" width="220" height="220" aria-label="Color wheel"></canvas><input type="range" id="bright" min="5" max="100" value="100" aria-label="Brightness"><div id="rgb"></div><div id="presets"></div></section>
+.chip{min-height:46px;padding:6px 14px;font-size:18px;border-radius:14px;border:2px solid var(--line);background:rgba(255,255,255,.5);white-space:nowrap;transition:background .2s,border-color .2s}
+.chip.on{background:var(--apricot);border-color:var(--terra);font-weight:700}
+.grid .chip{min-height:58px;padding:4px;text-align:center;font-size:16px}
+.grid .chip b{display:block;font-size:26px}
+
+#wheel{display:block;margin:0 auto 12px;width:220px;height:220px;border-radius:50%;touch-action:none;box-shadow:0 0 0 3px #fff,0 6px 18px rgba(47,58,47,.22)}
+#bright{-webkit-appearance:none;appearance:none;width:100%;height:18px;border-radius:9px;background:var(--bg,#ddd);margin:0 0 10px;touch-action:none;box-shadow:inset 0 1px 3px rgba(47,58,47,.3),0 0 0 1.5px rgba(255,255,255,.8)}
+#bright::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--ink);box-shadow:0 2px 6px rgba(47,58,47,.35)}
+#bright::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--ink);box-shadow:0 2px 6px rgba(47,58,47,.35)}
+#rgb{text-align:center;font-size:19px;font-weight:700;letter-spacing:.04em;margin-bottom:10px;white-space:pre}
+#presets{display:flex;justify-content:center;gap:12px}
+.sw{width:38px;height:38px;border-radius:50%;border:2px solid rgba(47,58,47,.25);padding:0;transition:transform .15s}
+.sw.on{border-color:var(--ink);box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}
+.sw:active{transform:scale(.92)}
+
+.row{display:flex;gap:10px;animation:rise .6s .18s ease both}
+.row button{flex:1;min-height:56px;font-size:clamp(19px,3.6vw,26px);font-weight:700;border-radius:16px;border:2px solid var(--line);transition:transform .12s,background .2s}
+.row button:not(:disabled):active{transform:scale(.97)}
+.row .go{flex:2.2;background:linear-gradient(135deg,var(--terra),var(--terra-deep));color:#fff;border-color:transparent;box-shadow:0 8px 22px rgba(217,93,57,.38)}
+.row .go:not(:disabled):hover{background:linear-gradient(135deg,#E0663F,var(--terra-deep))}
+.row button:not(.go):not(:disabled):hover{background:rgba(255,255,255,.85)}
+.row button:disabled{opacity:.45}
+
+#toast{position:fixed;inset:0;display:grid;place-items:center;background:rgba(47,58,47,.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--cream);font-size:clamp(26px,5.5vw,46px);font-weight:700;opacity:0;pointer-events:none;transition:opacity .4s}
+#toast.on{opacity:1;animation:toast-in .4s cubic-bezier(.22,1,.36,1)}
+
+button:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@keyframes pop-in{0%{opacity:0;transform:translateY(12px) scale(.92)}60%{opacity:1;transform:translateY(-3px) scale(1.02)}100%{opacity:1;transform:none}}
+@keyframes pen-pop{0%{transform:translateY(4px) scale(.85)}55%{transform:translateY(-21px) scale(1.13)}100%{transform:translateY(-16px) scale(1.06)}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes toast-in{from{transform:scale(.94)}to{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .pen.on{transform:translateY(-16px)}
+}
+</style>
+</head>
+
+<body>
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="bd" x1="0" x2="1">
+        <stop offset="0" stop-color="#f4f5fa" />
+        <stop offset=".55" stop-color="#d3d6e4" />
+        <stop offset="1" stop-color="#aeb2c6" />
+      </linearGradient>
+    </defs>
+  </svg>
+  <h1>Write your message</h1>
+  <p>Before I Am</p>
+  <div id="paper"><canvas id="c"></canvas>
+    <div id="hint">Write or draw here</div>
   </div>
-  <div id="tray"></div>
-</div>
-<div class="row"><button id="undo">Undo</button><button id="redo">Redo</button><button id="reset">Reset</button><button id="save" class="go">Send to the wall</button></div>
-<div id="toast">Sent. Look up.</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="config.js"></script><script src="store.js"></script>
-<script>const $=id=>document.getElementById(id),cv=$("c"),ctx=cv.getContext("2d",{willReadFrequently:true});
-const PENS=[["solid","Pen"],["brush","Brush"],["pencil","Pencil"],["marker","Marker"],["spray","Spray"],["calligraphy","Calligraphy"],["neon","Neon"],["eraser","Eraser"]];
-const SHAPES=[["line","Line","╱"],["rect","Rectangle","▭"],["ellipse","Circle","◯"],["triangle","Triangle","△"],["star","Star","☆"],["heart","Heart","♡"],["arrow","Arrow","➜"]];
-const PRESETS=["#1b2340","#1f3a93","#c0392b","#2e7d32","#6a1b9a","#b8860b"];
-const PC="style=\"fill:var(--c)\"";
-const TIPS={
- solid:'<path d="M16 44 L22 6 L28 44Z" fill="#d9dbe8"/><path d="M20.4 20 L22 6 L23.6 20Z" fill="#2a2d44"/>',
- brush:`<path d="M15 44 C15 26 19 14 22 4 C25 14 29 26 29 44Z" ${PC}/>`,
- pencil:'<path d="M14 44 L22 12 L30 44Z" fill="#e8c28a"/><path d="M19.6 24 L22 12 L24.4 24Z" fill="#33364d"/>',
- marker:`<path d="M13 44 L16 24 L28 24 L31 44Z" fill="#cfd2e1"/><path d="M16 24 L19 10 L25 10 L28 24Z" ${PC}/>`,
- spray:`<rect x="16" y="26" width="12" height="18" rx="2" fill="#b9bccd"/><rect x="19" y="18" width="6" height="8" rx="1" fill="#8f93aa"/><circle cx="16" cy="10" r="1.7" ${PC}/><circle cx="22" cy="5" r="1.7" ${PC}/><circle cx="28" cy="10" r="1.7" ${PC}/>`,
- calligraphy:'<path d="M14 44 L22 6 L30 44 Q22 38 14 44Z" fill="#d6bb6f"/><path d="M22 14 L22 36" stroke="#2a2d44" stroke-width="1.4"/>',
- neon:`<circle cx="22" cy="14" r="11" style="fill:var(--c);opacity:.35"/><path d="M17 44 L22 12 L27 44Z" fill="#d9dbe8"/><circle cx="22" cy="12" r="3.5" ${PC}/>`,
- eraser:''};
-function penSVG(k){const body=k==="eraser"?'<rect x="10" y="26" width="24" height="98" rx="5" fill="url(#bd)"/><rect x="10" y="26" width="24" height="24" rx="5" fill="#f1a7b4"/>'
-  :`<rect x="10" y="44" width="24" height="80" rx="4" fill="url(#bd)"/><rect x="10" y="44" width="24" height="9" ${PC}/>`;
-  return`<svg viewBox="0 0 44 120" aria-hidden="true">${body}${TIPS[k]}</svg>`}
-let tool="solid",color="#1b2340",size=6,fill=false,hist=[],hi=-1,drawing=false,pid=null,base,pts=[],start,last,lastT,lw,moved=false,H=.12,S=.16,V=1,popFor=null;
-const isShape=()=>SHAPES.some(s=>s[0]===tool);
+  <div id="dock">
+    <div id="pop" hidden>
+      <section id="p-size" hidden>
+        <div class="ph" id="pname"></div>
+        <div class="sl"><span class="dot" id="sdot"></span><input type="range" class="sz" min="2" max="40" value="6"
+            aria-label="Size"></div>
+      </section>
+      <section id="p-shapes" hidden>
+        <div class="grid" id="sgrid"></div>
+        <div class="sl"><span class="dot sdot2"></span><input type="range" class="sz" min="2" max="40" value="6"
+            aria-label="Size"><button class="chip" id="fillb">Fill</button></div>
+      </section>
+      <section id="p-color" hidden><canvas id="wheel" width="220" height="220" aria-label="Color wheel"></canvas><input
+          type="range" id="bright" min="5" max="100" value="100" aria-label="Brightness">
+        <div id="rgb"></div>
+        <div id="presets"></div>
+      </section>
+    </div>
+    <div id="tray"></div>
+  </div>
+  <div class="row"><button id="undo">Undo</button><button id="redo">Redo</button><button
+      id="reset">Reset</button><button id="save" class="go">Send to the wall</button></div>
+  <div id="toast">Sent. Look up.</div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="store.js"></script>
+  <script>const $ = id => document.getElementById(id), cv = $("c"), ctx = cv.getContext("2d", { willReadFrequently: true });
+    const PENS = [["solid", "Pen"], ["brush", "Brush"], ["pencil", "Pencil"], ["marker", "Marker"], ["spray", "Spray"], ["calligraphy", "Calligraphy"], ["neon", "Neon"], ["eraser", "Eraser"]];
+    const SHAPES = [["line", "Line", "╱"], ["rect", "Rectangle", "▭"], ["ellipse", "Circle", "◯"], ["triangle", "Triangle", "△"], ["star", "Star", "☆"], ["heart", "Heart", "♡"], ["arrow", "Arrow", "➜"]];
+    const PRESETS = ["#2F3A2F", "#D95D39", "#7A9B76", "#F0A86E", "#6B4E71", "#4A6FA5"];
+    const PC = "style=\"fill:var(--c)\"";
+    const TIPS = {
+      solid: '<path d="M16 44 L22 6 L28 44Z" fill="#d9dbe8"/><path d="M20.4 20 L22 6 L23.6 20Z" fill="#2a2d44"/>',
+      brush: `<path d="M15 44 C15 26 19 14 22 4 C25 14 29 26 29 44Z" ${PC}/>`,
+      pencil: '<path d="M14 44 L22 12 L30 44Z" fill="#e8c28a"/><path d="M19.6 24 L22 12 L24.4 24Z" fill="#33364d"/>',
+      marker: `<path d="M13 44 L16 24 L28 24 L31 44Z" fill="#cfd2e1"/><path d="M16 24 L19 10 L25 10 L28 24Z" ${PC}/>`,
+      spray: `<rect x="16" y="26" width="12" height="18" rx="2" fill="#b9bccd"/><rect x="19" y="18" width="6" height="8" rx="1" fill="#8f93aa"/><circle cx="16" cy="10" r="1.7" ${PC}/><circle cx="22" cy="5" r="1.7" ${PC}/><circle cx="28" cy="10" r="1.7" ${PC}/>`,
+      calligraphy: '<path d="M14 44 L22 6 L30 44 Q22 38 14 44Z" fill="#d6bb6f"/><path d="M22 14 L22 36" stroke="#2a2d44" stroke-width="1.4"/>',
+      neon: `<circle cx="22" cy="14" r="11" style="fill:var(--c);opacity:.35"/><path d="M17 44 L22 12 L27 44Z" fill="#d9dbe8"/><circle cx="22" cy="12" r="3.5" ${PC}/>`,
+      eraser: ''
+    };
+    function penSVG(k) {
+      const body = k === "eraser" ? '<rect x="10" y="26" width="24" height="98" rx="5" fill="url(#bd)"/><rect x="10" y="26" width="24" height="24" rx="5" fill="#f1a7b4"/>'
+        : `<rect x="10" y="44" width="24" height="80" rx="4" fill="url(#bd)"/><rect x="10" y="44" width="24" height="9" ${PC}/>`;
+      return `<svg viewBox="0 0 44 120" aria-hidden="true">${body}${TIPS[k]}</svg>`
+    }
+    let tool = "solid", color = "#2F3A2F", size = 6, fill = false, hist = [], hi = -1, drawing = false, pid = null, base, pts = [], start, last, lastT, lw, moved = false, H = .12, S = .16, V = 1, popFor = null;
+    const isShape = () => SHAPES.some(s => s[0] === tool);
 
-// ---- pen tray (Freeform style) + popovers
-const tray=$("tray"),pop=$("pop"),dock=$("dock");
-PENS.forEach(([k,l])=>{const b=document.createElement("button");b.className="pen";b.dataset.t=k;b.title=l;b.setAttribute("aria-label",l);b.innerHTML=penSVG(k);
-  b.onclick=()=>{if(tool===k){popFor==="size"?closePop():(($("pname").textContent=l),openPop("size",b))}else{tool=k;mark();closePop()}};tray.append(b)});
-const stile=Object.assign(document.createElement("button"),{className:"tile"});stile.onclick=()=>popFor==="shapes"?closePop():openPop("shapes",stile);tray.append(stile);
-const ctile=Object.assign(document.createElement("button"),{className:"ctile",title:"Colors"});ctile.setAttribute("aria-label","Colors");ctile.onclick=()=>popFor==="color"?closePop():openPop("color",ctile);tray.append(ctile);
-SHAPES.forEach(([k,l,g])=>{const b=document.createElement("button");b.className="chip";b.dataset.s=k;b.innerHTML=`<b>${g}</b>${l}`;b.onclick=()=>{tool=k;mark();closePop()};$("sgrid").append(b)});
-function mark(){document.querySelectorAll(".pen").forEach(b=>b.classList.toggle("on",b.dataset.t===tool));
-  document.querySelectorAll("[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===tool));
-  const sh=SHAPES.find(s=>s[0]===tool);stile.classList.toggle("on",!!sh);stile.innerHTML=`<span><b>${sh?sh[2]:"△◯"}</b>Shapes</span>`}
-function openPop(mode,anchor){document.querySelectorAll("#pop section").forEach(s=>s.hidden=s.id!=="p-"+mode);pop.hidden=false;popFor=mode;if(mode==="color")drawWheel();
-  const d=dock.getBoundingClientRect(),r=anchor.getBoundingClientRect(),w=pop.offsetWidth;pop.style.left=Math.max(0,Math.min(d.width-w,r.left+r.width/2-d.left-w/2))+"px"}
-function closePop(){pop.hidden=true;popFor=null}
-document.addEventListener("pointerdown",e=>{if(!pop.hidden&&!pop.contains(e.target)&&!e.target.closest("#tray"))closePop()},true);
-function syncSize(){document.querySelectorAll(".sz").forEach(i=>i.value=size);document.querySelectorAll(".dot").forEach(d=>d.style.width=d.style.height=Math.max(6,size*1.6)+"px")}
-document.querySelectorAll(".sz").forEach(i=>i.oninput=()=>{size=+i.value;syncSize()});
-$("fillb").onclick=()=>{fill=!fill;$("fillb").classList.toggle("on",fill)};
+    // ---- pen tray (Freeform style) + popovers
+    const tray = $("tray"), pop = $("pop"), dock = $("dock");
+    PENS.forEach(([k, l]) => {
+      const b = document.createElement("button"); b.className = "pen"; b.dataset.t = k; b.title = l; b.setAttribute("aria-label", l); b.innerHTML = penSVG(k);
+      b.onclick = () => { if (tool === k) { popFor === "size" ? closePop() : (($("pname").textContent = l), openPop("size", b)) } else { tool = k; mark(); closePop() } }; tray.append(b)
+    });
+    const stile = Object.assign(document.createElement("button"), { className: "tile" }); stile.onclick = () => popFor === "shapes" ? closePop() : openPop("shapes", stile); tray.append(stile);
+    const ctile = Object.assign(document.createElement("button"), { className: "ctile", title: "Colors" }); ctile.setAttribute("aria-label", "Colors"); ctile.onclick = () => popFor === "color" ? closePop() : openPop("color", ctile); tray.append(ctile);
+    SHAPES.forEach(([k, l, g]) => { const b = document.createElement("button"); b.className = "chip"; b.dataset.s = k; b.innerHTML = `<b>${g}</b>${l}`; b.onclick = () => { tool = k; mark(); closePop() }; $("sgrid").append(b) });
+    function mark() {
+      document.querySelectorAll(".pen").forEach(b => b.classList.toggle("on", b.dataset.t === tool));
+      document.querySelectorAll("[data-s]").forEach(b => b.classList.toggle("on", b.dataset.s === tool));
+      const sh = SHAPES.find(s => s[0] === tool); stile.classList.toggle("on", !!sh); stile.innerHTML = `<span><b>${sh ? sh[2] : "△◯"}</b>Shapes</span>`
+    }
+    function openPop(mode, anchor) {
+      document.querySelectorAll("#pop section").forEach(s => s.hidden = s.id !== "p-" + mode); pop.hidden = false; popFor = mode; if (mode === "color") drawWheel();
+      const d = dock.getBoundingClientRect(), r = anchor.getBoundingClientRect(), w = pop.offsetWidth; pop.style.left = Math.max(0, Math.min(d.width - w, r.left + r.width / 2 - d.left - w / 2)) + "px"
+    }
+    function closePop() { pop.hidden = true; popFor = null }
+    document.addEventListener("pointerdown", e => { if (!pop.hidden && !pop.contains(e.target) && !e.target.closest("#tray")) closePop() }, true);
+    function syncSize() { document.querySelectorAll(".sz").forEach(i => i.value = size); document.querySelectorAll(".dot").forEach(d => d.style.width = d.style.height = Math.max(6, size * 1.6) + "px") }
+    document.querySelectorAll(".sz").forEach(i => i.oninput = () => { size = +i.value; syncSize() });
+    $("fillb").onclick = () => { fill = !fill; $("fillb").classList.toggle("on", fill) };
 
-// ---- color wheel (RGB)
-const hsv2rgb=(h,s,v)=>{const i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),t=v*(1-(1-f)*s);return[[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]][i%6].map(x=>Math.round(x*255))};
-function rgb2hsv(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h/=6;if(h<0)h+=1}return[h,mx?d/mx:0,mx]}
-const hex=a=>"#"+a.map(x=>x.toString(16).padStart(2,"0")).join("");
-const wh=$("wheel"),wx=wh.getContext("2d");let wbase=null,wv=-1;
-function drawWheel(){
-  if(wv!==V){const img=wx.createImageData(220,220),d=img.data;
-    for(let y=0;y<220;y++)for(let x=0;x<220;x++){const dx=x-110,dy=y-110,r=Math.hypot(dx,dy);if(r>110)continue;
-      const c=hsv2rgb((Math.atan2(dy,dx)/6.2832+1)%1,r/110,V),i=(y*220+x)*4;d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2];d[i+3]=255}
-    wbase=img;wv=V}
-  wx.putImageData(wbase,0,0);const a=H*6.2832,px=110+Math.cos(a)*S*110,py=110+Math.sin(a)*S*110;
-  wx.beginPath();wx.arc(px,py,11,0,7);wx.fillStyle=color;wx.fill();wx.lineWidth=3;wx.strokeStyle="#fff";wx.stroke();wx.lineWidth=1;wx.strokeStyle="#000a";wx.beginPath();wx.arc(px,py,13,0,7);wx.stroke()}
-function paint(){const rgb=hsv2rgb(H,S,V);color=hex(rgb);
-  document.documentElement.style.setProperty("--c",color);$("rgb").textContent=`R ${rgb[0]}    G ${rgb[1]}    B ${rgb[2]}`;
-  $("bright").style.setProperty("--bg",`linear-gradient(90deg,#000,${hex(hsv2rgb(H,S,1))})`);$("bright").value=Math.round(V*100);
-  document.querySelectorAll(".sw").forEach(s=>s.classList.toggle("on",s.dataset.c===color));
-  if(tool==="eraser"){tool="solid";mark()}if(popFor==="color")drawWheel()}
-function setColor(h){const n=parseInt(h.slice(1),16);[H,S,V]=rgb2hsv(n>>16,n>>8&255,n&255);paint()}
-PRESETS.forEach(c=>{const b=document.createElement("button");b.className="sw";b.style.background=c;b.dataset.c=c;b.setAttribute("aria-label","Color "+c);b.onclick=()=>setColor(c);$("presets").append(b)});
-let wd=false;const wp=e=>{const r=wh.getBoundingClientRect(),x=(e.clientX-r.left)*220/r.width-110,y=(e.clientY-r.top)*220/r.height-110;H=(Math.atan2(y,x)/6.2832+1)%1;S=Math.min(110,Math.hypot(x,y))/110;paint()};
-wh.onpointerdown=e=>{wd=true;wh.setPointerCapture(e.pointerId);wp(e)};wh.onpointermove=e=>wd&&wp(e);wh.onpointerup=wh.onpointercancel=()=>wd=false;
-$("bright").oninput=e=>{V=e.target.value/100;paint()};
-mark();syncSize();setColor(color);
+    // ---- color wheel (RGB)
+    const hsv2rgb = (h, s, v) => { const i = Math.floor(h * 6), f = h * 6 - i, p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s); return [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][i % 6].map(x => Math.round(x * 255)) };
+    function rgb2hsv(r, g, b) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0; if (d) { h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; if (h < 0) h += 1 } return [h, mx ? d / mx : 0, mx] }
+    const hex = a => "#" + a.map(x => x.toString(16).padStart(2, "0")).join("");
+    const wh = $("wheel"), wx = wh.getContext("2d"); let wbase = null, wv = -1;
+    function drawWheel() {
+      if (wv !== V) {
+        const img = wx.createImageData(220, 220), d = img.data;
+        for (let y = 0; y < 220; y++)for (let x = 0; x < 220; x++) {
+          const dx = x - 110, dy = y - 110, r = Math.hypot(dx, dy); if (r > 110) continue;
+          const c = hsv2rgb((Math.atan2(dy, dx) / 6.2832 + 1) % 1, r / 110, V), i = (y * 220 + x) * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255
+        }
+        wbase = img; wv = V
+      }
+      wx.putImageData(wbase, 0, 0); const a = H * 6.2832, px = 110 + Math.cos(a) * S * 110, py = 110 + Math.sin(a) * S * 110;
+      wx.beginPath(); wx.arc(px, py, 11, 0, 7); wx.fillStyle = color; wx.fill(); wx.lineWidth = 3; wx.strokeStyle = "#fff"; wx.stroke(); wx.lineWidth = 1; wx.strokeStyle = "#000a"; wx.beginPath(); wx.arc(px, py, 13, 0, 7); wx.stroke()
+    }
+    function paint() {
+      const rgb = hsv2rgb(H, S, V); color = hex(rgb);
+      document.documentElement.style.setProperty("--c", color); $("rgb").textContent = `R ${rgb[0]}    G ${rgb[1]}    B ${rgb[2]}`;
+      $("bright").style.setProperty("--bg", `linear-gradient(90deg,#000,${hex(hsv2rgb(H, S, 1))})`); $("bright").value = Math.round(V * 100);
+      document.querySelectorAll(".sw").forEach(s => s.classList.toggle("on", s.dataset.c === color));
+      if (tool === "eraser") { tool = "solid"; mark() } if (popFor === "color") drawWheel()
+    }
+    function setColor(h) { const n = parseInt(h.slice(1), 16);[H, S, V] = rgb2hsv(n >> 16, n >> 8 & 255, n & 255); paint() }
+    PRESETS.forEach(c => { const b = document.createElement("button"); b.className = "sw"; b.style.background = c; b.dataset.c = c; b.setAttribute("aria-label", "Color " + c); b.onclick = () => setColor(c); $("presets").append(b) });
+    let wd = false; const wp = e => { const r = wh.getBoundingClientRect(), x = (e.clientX - r.left) * 220 / r.width - 110, y = (e.clientY - r.top) * 220 / r.height - 110; H = (Math.atan2(y, x) / 6.2832 + 1) % 1; S = Math.min(110, Math.hypot(x, y)) / 110; paint() };
+    wh.onpointerdown = e => { wd = true; wh.setPointerCapture(e.pointerId); wp(e) }; wh.onpointermove = e => wd && wp(e); wh.onpointerup = wh.onpointercancel = () => wd = false;
+    $("bright").oninput = e => { V = e.target.value / 100; paint() };
+    mark(); syncSize(); setColor(color);
 
-// ---- paper texture (what the writer sees is what gets sent)
-const KEEP_PAPER=true;   // true: the note keeps its paper look on the wall. false: only the ink is sent (transparent).
-let paperTex;
-function makePaper(w,h){
-  const p=document.createElement("canvas");p.width=w;p.height=h;const x=p.getContext("2d");
-  x.fillStyle="#f4ecd8";x.fillRect(0,0,w,h);
-  for(let i=0;i<45;i++){const cx=Math.random()*w,cy=Math.random()*h,r=70+Math.random()*190,g=x.createRadialGradient(cx,cy,0,cx,cy,r);
-    g.addColorStop(0,Math.random()<.5?"rgba(150,115,65,.07)":"rgba(255,255,255,.12)");g.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=g;x.fillRect(cx-r,cy-r,r*2,r*2)}
-  const id=x.getImageData(0,0,w,h),d=id.data;
-  for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*15;d[i]+=n;d[i+1]+=n;d[i+2]+=n*.9}
-  x.putImageData(id,0,0);
-  x.lineWidth=.7;
-  for(let i=0;i<Math.round(w*h/3500);i++){const sx=Math.random()*w,sy=Math.random()*h,a=Math.random()*6.28,l=6+Math.random()*16;
-    x.strokeStyle=Math.random()<.5?"rgba(120,92,55,.10)":"rgba(255,255,255,.18)";x.beginPath();x.moveTo(sx,sy);
-    x.quadraticCurveTo(sx+Math.cos(a)*l*.5+Math.random()*4,sy+Math.sin(a)*l*.5+Math.random()*4,sx+Math.cos(a)*l,sy+Math.sin(a)*l);x.stroke()}
-  const v=x.createRadialGradient(w/2,h/2,Math.min(w,h)*.35,w/2,h/2,Math.max(w,h)*.75);v.addColorStop(0,"rgba(0,0,0,0)");v.addColorStop(1,"rgba(110,80,40,.18)");
-  x.fillStyle=v;x.fillRect(0,0,w,h);
-  return p}
+    // ---- paper texture (what the writer sees is what gets sent)
+    const KEEP_PAPER = true;   // true: the note keeps its paper look on the wall. false: only the ink is sent (transparent).
+    let paperTex;
+    function makePaper(w, h) {
+      const p = document.createElement("canvas"); p.width = w; p.height = h; const x = p.getContext("2d");
+      x.fillStyle = "#f4ecd8"; x.fillRect(0, 0, w, h);
+      for (let i = 0; i < 45; i++) {
+        const cx = Math.random() * w, cy = Math.random() * h, r = 70 + Math.random() * 190, g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, Math.random() < .5 ? "rgba(150,115,65,.07)" : "rgba(255,255,255,.12)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(cx - r, cy - r, r * 2, r * 2)
+      }
+      const id = x.getImageData(0, 0, w, h), d = id.data;
+      for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * 15; d[i] += n; d[i + 1] += n; d[i + 2] += n * .9 }
+      x.putImageData(id, 0, 0);
+      x.lineWidth = .7;
+      for (let i = 0; i < Math.round(w * h / 3500); i++) {
+        const sx = Math.random() * w, sy = Math.random() * h, a = Math.random() * 6.28, l = 6 + Math.random() * 16;
+        x.strokeStyle = Math.random() < .5 ? "rgba(120,92,55,.10)" : "rgba(255,255,255,.18)"; x.beginPath(); x.moveTo(sx, sy);
+        x.quadraticCurveTo(sx + Math.cos(a) * l * .5 + Math.random() * 4, sy + Math.sin(a) * l * .5 + Math.random() * 4, sx + Math.cos(a) * l, sy + Math.sin(a) * l); x.stroke()
+      }
+      const v = x.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .35, w / 2, h / 2, Math.max(w, h) * .75); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(110,80,40,.18)");
+      x.fillStyle = v; x.fillRect(0, 0, w, h);
+      return p
+    }
 
-// ---- history (undo / redo / reset)
-const snap=()=>ctx.getImageData(0,0,cv.width,cv.height);
-function ui(){$("undo").disabled=hi<=0;$("redo").disabled=hi>=hist.length-1;$("save").disabled=hi<=0;$("hint").style.display=hi>0?"none":""}
-function push(){hist=hist.slice(0,hi+1);hist.push(snap());if(hist.length>25)hist.shift();hi=hist.length-1;ui()}
-function go(i){hi=i;ctx.putImageData(hist[hi],0,0);ui()}
-function fresh(){const r=cv.getBoundingClientRect();cv.width=Math.round(r.width);cv.height=Math.round(r.height);ctx.clearRect(0,0,cv.width,cv.height);hist=[snap()];hi=0;ui();paperTex=makePaper(cv.width,cv.height);$("paper").style.backgroundImage="url("+paperTex.toDataURL("image/jpeg",.9)+")"}
-$("undo").onclick=()=>hi>0&&go(hi-1);$("redo").onclick=()=>hi<hist.length-1&&go(hi+1);
-$("reset").onclick=()=>{if(hi<=0)return;ctx.clearRect(0,0,cv.width,cv.height);push()};
-fresh();addEventListener("orientationchange",()=>setTimeout(()=>{if(hi<=0)fresh()},300));
-addEventListener("resize",()=>{if(hi<=0)fresh()});
+    // ---- history (undo / redo / reset)
+    const snap = () => ctx.getImageData(0, 0, cv.width, cv.height);
+    function ui() { $("undo").disabled = hi <= 0; $("redo").disabled = hi >= hist.length - 1; $("save").disabled = hi <= 0; $("hint").style.display = hi > 0 ? "none" : "" }
+    function push() { hist = hist.slice(0, hi + 1); hist.push(snap()); if (hist.length > 25) hist.shift(); hi = hist.length - 1; ui() }
+    function go(i) { hi = i; ctx.putImageData(hist[hi], 0, 0); ui() }
+    function fresh() { const r = cv.getBoundingClientRect(); cv.width = Math.round(r.width); cv.height = Math.round(r.height); ctx.clearRect(0, 0, cv.width, cv.height); hist = [snap()]; hi = 0; ui(); paperTex = makePaper(cv.width, cv.height); $("paper").style.backgroundImage = "url(" + paperTex.toDataURL("image/jpeg", .9) + ")" }
+    $("undo").onclick = () => hi > 0 && go(hi - 1); $("redo").onclick = () => hi < hist.length - 1 && go(hi + 1);
+    $("reset").onclick = () => { if (hi <= 0) return; ctx.clearRect(0, 0, cv.width, cv.height); push() };
+    fresh(); addEventListener("orientationchange", () => setTimeout(() => { if (hi <= 0) fresh() }, 300));
+    addEventListener("resize", () => { if (hi <= 0) fresh() });
 
-// ---- drawing
-const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
-function line(a,b){ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
-function seg(a,b,dt){
-  const[x0,y0]=a,dx=b[0]-x0,dy=b[1]-y0,dist=Math.hypot(dx,dy),n=Math.max(1,Math.ceil(dist/(tool==="spray"?4:1.5))),at=i=>[x0+dx*i/n,y0+dy*i/n];
-  ctx.save();ctx.lineCap=ctx.lineJoin="round";ctx.strokeStyle=ctx.fillStyle=color;ctx.lineWidth=size;
-  switch(tool){
-    case"solid":line(a,b);break;
-    case"eraser":ctx.globalCompositeOperation="destination-out";ctx.lineWidth=size*2;line(a,b);break;
-    case"brush":{const v=dist/Math.max(1,dt),t=size*Math.min(1.5,Math.max(.45,1.6-v*.5));lw=lw*.75+t*.25;ctx.lineWidth=lw;ctx.shadowColor=color;ctx.shadowBlur=size*.35;line(a,b);break}
-    case"pencil":ctx.globalAlpha=.55;for(let i=0;i<=n;i++){const[x,y]=at(i);for(let k=0;k<4;k++){const r=Math.random()*size*.5,t=Math.random()*6.28;ctx.fillRect(x+Math.cos(t)*r,y+Math.sin(t)*r,1.2,1.2)}}break;
-    case"spray":for(let i=0;i<=n;i++){const[x,y]=at(i);for(let k=0;k<size;k++){const r=Math.sqrt(Math.random())*size*2.2,t=Math.random()*6.28;ctx.globalAlpha=.4+Math.random()*.5;ctx.fillRect(x+Math.cos(t)*r,y+Math.sin(t)*r,1.3,1.3)}}break;
-    case"calligraphy":{const o=size*.6;ctx.lineWidth=2;ctx.lineCap="butt";for(let i=0;i<=n;i++){const[x,y]=at(i);ctx.beginPath();ctx.moveTo(x-o,y+o);ctx.lineTo(x+o,y-o);ctx.stroke()}break}
-    case"neon":ctx.shadowColor=color;ctx.shadowBlur=size*2.2;ctx.lineWidth=size*.9;line(a,b);ctx.shadowBlur=0;ctx.strokeStyle="#fff";ctx.globalAlpha=.85;ctx.lineWidth=Math.max(1.5,size*.3);line(a,b);break;
-  }
-  ctx.restore();
-}
-function marker(){ctx.putImageData(base,0,0);ctx.save();ctx.globalAlpha=.45;ctx.strokeStyle=color;ctx.lineWidth=size*1.8;ctx.lineCap=ctx.lineJoin="round";ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(p=>ctx.lineTo(p[0]+.01,p[1]));ctx.stroke();ctx.restore()}
-function shape(a,b){
-  const[x0,y0]=a,[x1,y1]=b,x=Math.min(x0,x1),y=Math.min(y0,y1),w=Math.abs(x1-x0),h=Math.abs(y1-y0),cx=(x0+x1)/2,cy=(y0+y1)/2;
-  ctx.save();ctx.lineWidth=size;ctx.lineJoin=ctx.lineCap="round";ctx.strokeStyle=ctx.fillStyle=color;ctx.beginPath();
-  switch(tool){
-    case"line":ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);break;
-    case"rect":ctx.rect(x,y,w,h);break;
-    case"ellipse":ctx.ellipse(cx,cy,w/2,h/2,0,0,6.283);break;
-    case"triangle":ctx.moveTo(cx,y);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;
-    case"star":{const R=Math.max(w,h)/2;for(let i=0;i<10;i++){const r=i%2?R*.42:R,t=-Math.PI/2+i*Math.PI/5;ctx[i?"lineTo":"moveTo"](cx+Math.cos(t)*r,cy+Math.sin(t)*r)}ctx.closePath();break}
-    case"heart":ctx.moveTo(cx,y+h*.3);ctx.bezierCurveTo(cx,y,x,y,x,y+h*.3);ctx.bezierCurveTo(x,y+h*.6,cx,y+h*.75,cx,y+h);ctx.bezierCurveTo(cx,y+h*.75,x+w,y+h*.6,x+w,y+h*.3);ctx.bezierCurveTo(x+w,y,cx,y,cx,y+h*.3);break;
-    case"arrow":{const t=Math.atan2(y1-y0,x1-x0),L=Math.max(14,size*3);ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.moveTo(x1-L*Math.cos(t-.5),y1-L*Math.sin(t-.5));ctx.lineTo(x1,y1);ctx.lineTo(x1-L*Math.cos(t+.5),y1-L*Math.sin(t+.5));break}
-  }
-  if(fill&&tool!=="line"&&tool!=="arrow")ctx.fill();ctx.stroke();ctx.restore();
-}
-cv.addEventListener("pointerdown",e=>{
-  if(drawing)return;drawing=true;moved=false;pid=e.pointerId;cv.setPointerCapture(pid);
-  base=hist[hi];start=last=pos(e);lastT=e.timeStamp;lw=size;pts=[start];$("hint").style.display="none";
-  if(tool==="marker")marker();else if(!isShape()){seg(start,start,16);moved=true}
-});
-cv.addEventListener("pointermove",e=>{
-  if(!drawing||e.pointerId!==pid)return;
-  if(isShape()){ctx.putImageData(base,0,0);shape(start,pos(e));moved=true;return}
-  for(const ev of(e.getCoalescedEvents?.()||[e])){const p=pos(ev);moved=true;
-    if(tool==="marker"){pts.push(p)}else{seg(last,p,ev.timeStamp-lastT);last=p;lastT=ev.timeStamp}}
-  if(tool==="marker")marker();
-});
-function end(e){if(!drawing||e.pointerId!==pid)return;drawing=false;if(moved||tool==="marker")push();else ui()}
-cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
+    // ---- drawing
+    const pos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * cv.width / r.width, (e.clientY - r.top) * cv.height / r.height] };
+    function line(a, b) { ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke() }
+    function seg(a, b, dt) {
+      const [x0, y0] = a, dx = b[0] - x0, dy = b[1] - y0, dist = Math.hypot(dx, dy), n = Math.max(1, Math.ceil(dist / (tool === "spray" ? 4 : 1.5))), at = i => [x0 + dx * i / n, y0 + dy * i / n];
+      ctx.save(); ctx.lineCap = ctx.lineJoin = "round"; ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = size;
+      switch (tool) {
+        case "solid": line(a, b); break;
+        case "eraser": ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = size * 2; line(a, b); break;
+        case "brush": { const v = dist / Math.max(1, dt), t = size * Math.min(1.5, Math.max(.45, 1.6 - v * .5)); lw = lw * .75 + t * .25; ctx.lineWidth = lw; ctx.shadowColor = color; ctx.shadowBlur = size * .35; line(a, b); break }
+        case "pencil": ctx.globalAlpha = .55; for (let i = 0; i <= n; i++) { const [x, y] = at(i); for (let k = 0; k < 4; k++) { const r = Math.random() * size * .5, t = Math.random() * 6.28; ctx.fillRect(x + Math.cos(t) * r, y + Math.sin(t) * r, 1.2, 1.2) } } break;
+        case "spray": for (let i = 0; i <= n; i++) { const [x, y] = at(i); for (let k = 0; k < size; k++) { const r = Math.sqrt(Math.random()) * size * 2.2, t = Math.random() * 6.28; ctx.globalAlpha = .4 + Math.random() * .5; ctx.fillRect(x + Math.cos(t) * r, y + Math.sin(t) * r, 1.3, 1.3) } } break;
+        case "calligraphy": { const o = size * .6; ctx.lineWidth = 2; ctx.lineCap = "butt"; for (let i = 0; i <= n; i++) { const [x, y] = at(i); ctx.beginPath(); ctx.moveTo(x - o, y + o); ctx.lineTo(x + o, y - o); ctx.stroke() } break }
+        case "neon": ctx.shadowColor = color; ctx.shadowBlur = size * 2.2; ctx.lineWidth = size * .9; line(a, b); ctx.shadowBlur = 0; ctx.strokeStyle = "#fff"; ctx.globalAlpha = .85; ctx.lineWidth = Math.max(1.5, size * .3); line(a, b); break;
+      }
+      ctx.restore();
+    }
+    function marker() { ctx.putImageData(base, 0, 0); ctx.save(); ctx.globalAlpha = .45; ctx.strokeStyle = color; ctx.lineWidth = size * 1.8; ctx.lineCap = ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); pts.forEach(p => ctx.lineTo(p[0] + .01, p[1])); ctx.stroke(); ctx.restore() }
+    function shape(a, b) {
+      const [x0, y0] = a, [x1, y1] = b, x = Math.min(x0, x1), y = Math.min(y0, y1), w = Math.abs(x1 - x0), h = Math.abs(y1 - y0), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      ctx.save(); ctx.lineWidth = size; ctx.lineJoin = ctx.lineCap = "round"; ctx.strokeStyle = ctx.fillStyle = color; ctx.beginPath();
+      switch (tool) {
+        case "line": ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); break;
+        case "rect": ctx.rect(x, y, w, h); break;
+        case "ellipse": ctx.ellipse(cx, cy, w / 2, h / 2, 0, 0, 6.283); break;
+        case "triangle": ctx.moveTo(cx, y); ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath(); break;
+        case "star": { const R = Math.max(w, h) / 2; for (let i = 0; i < 10; i++) { const r = i % 2 ? R * .42 : R, t = -Math.PI / 2 + i * Math.PI / 5; ctx[i ? "lineTo" : "moveTo"](cx + Math.cos(t) * r, cy + Math.sin(t) * r) } ctx.closePath(); break }
+        case "heart": ctx.moveTo(cx, y + h * .3); ctx.bezierCurveTo(cx, y, x, y, x, y + h * .3); ctx.bezierCurveTo(x, y + h * .6, cx, y + h * .75, cx, y + h); ctx.bezierCurveTo(cx, y + h * .75, x + w, y + h * .6, x + w, y + h * .3); ctx.bezierCurveTo(x + w, y, cx, y, cx, y + h * .3); break;
+        case "arrow": { const t = Math.atan2(y1 - y0, x1 - x0), L = Math.max(14, size * 3); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.moveTo(x1 - L * Math.cos(t - .5), y1 - L * Math.sin(t - .5)); ctx.lineTo(x1, y1); ctx.lineTo(x1 - L * Math.cos(t + .5), y1 - L * Math.sin(t + .5)); break }
+      }
+      if (fill && tool !== "line" && tool !== "arrow") ctx.fill(); ctx.stroke(); ctx.restore();
+    }
+    cv.addEventListener("pointerdown", e => {
+      if (drawing) return; drawing = true; moved = false; pid = e.pointerId; cv.setPointerCapture(pid);
+      base = hist[hi]; start = last = pos(e); lastT = e.timeStamp; lw = size; pts = [start]; $("hint").style.display = "none";
+      if (tool === "marker") marker(); else if (!isShape()) { seg(start, start, 16); moved = true }
+    });
+    cv.addEventListener("pointermove", e => {
+      if (!drawing || e.pointerId !== pid) return;
+      if (isShape()) { ctx.putImageData(base, 0, 0); shape(start, pos(e)); moved = true; return }
+      for (const ev of (e.getCoalescedEvents?.() || [e])) {
+        const p = pos(ev); moved = true;
+        if (tool === "marker") { pts.push(p) } else { seg(last, p, ev.timeStamp - lastT); last = p; lastT = ev.timeStamp }
+      }
+      if (tool === "marker") marker();
+    });
+    function end(e) { if (!drawing || e.pointerId !== pid) return; drawing = false; if (moved || tool === "marker") push(); else ui() }
+    cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
 
-// ---- send
-$("save").onclick=async()=>{
-  const full=ctx.getImageData(0,0,cv.width,cv.height),d=full.data,W=cv.width,H=cv.height;
-  let x0=W,y0=H,x1=-1,y1=-1;
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(d[(y*W+x)*4+3]>8){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
-  if(x1<0)return;$("save").disabled=true;
-  let x,y,w,h;
-  if(KEEP_PAPER){const pad=48;w=Math.min(W,Math.max(x1-x0+2*pad,300));h=Math.min(H,Math.max(y1-y0+2*pad,160));
-    x=Math.max(0,Math.min(W-w,(x0+x1)/2-w/2));y=Math.max(0,Math.min(H-h,(y0+y1)/2-h/2))}
-  else{const pad=24;x=Math.max(0,x0-pad);y=Math.max(0,y0-pad);w=Math.min(W,x1+pad)-x;h=Math.min(H,y1+pad)-y}
-  const t=document.createElement("canvas");t.width=w;t.height=h;const tc=t.getContext("2d");
-  if(KEEP_PAPER)tc.drawImage(paperTex,x,y,w,h,0,0,w,h);
-  tc.drawImage(cv,x,y,w,h,0,0,w,h);
-  let s=Math.min(1,700/w),png;
-  for(let i=0;i<5;i++){const o=document.createElement("canvas");o.width=Math.max(1,Math.round(w*s));o.height=Math.max(1,Math.round(h*s));o.getContext("2d").drawImage(t,0,0,o.width,o.height);png=o.toDataURL(KEEP_PAPER?"image/jpeg":"image/png",.9);if(png.length<380000)break;s*=.75}
-  try{await Store.add(png);$("toast").classList.add("on");setTimeout(()=>{$("toast").classList.remove("on");ctx.clearRect(0,0,cv.width,cv.height);hist=[snap()];hi=0;ui()},1800)}
-  catch(err){console.error(err);alert("Could not send.\n"+(err&&err.message?err.message:err));ui()}
-};
-</script></body></html>
+    // ---- send
+    $("save").onclick = async () => {
+      const full = ctx.getImageData(0, 0, cv.width, cv.height), d = full.data, W = cv.width, H = cv.height;
+      let x0 = W, y0 = H, x1 = -1, y1 = -1;
+      for (let y = 0; y < H; y++)for (let x = 0; x < W; x++)if (d[(y * W + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y }
+      if (x1 < 0) return; $("save").disabled = true;
+      let x, y, w, h;
+      if (KEEP_PAPER) {
+        const pad = 48; w = Math.min(W, Math.max(x1 - x0 + 2 * pad, 300)); h = Math.min(H, Math.max(y1 - y0 + 2 * pad, 160));
+        x = Math.max(0, Math.min(W - w, (x0 + x1) / 2 - w / 2)); y = Math.max(0, Math.min(H - h, (y0 + y1) / 2 - h / 2))
+      }
+      else { const pad = 24; x = Math.max(0, x0 - pad); y = Math.max(0, y0 - pad); w = Math.min(W, x1 + pad) - x; h = Math.min(H, y1 + pad) - y }
+      const t = document.createElement("canvas"); t.width = w; t.height = h; const tc = t.getContext("2d");
+      if (KEEP_PAPER) tc.drawImage(paperTex, x, y, w, h, 0, 0, w, h);
+      tc.drawImage(cv, x, y, w, h, 0, 0, w, h);
+      let s = Math.min(1, 700 / w), png;
+      for (let i = 0; i < 5; i++) { const o = document.createElement("canvas"); o.width = Math.max(1, Math.round(w * s)); o.height = Math.max(1, Math.round(h * s)); o.getContext("2d").drawImage(t, 0, 0, o.width, o.height); png = o.toDataURL(KEEP_PAPER ? "image/jpeg" : "image/png", .9); if (png.length < 380000) break; s *= .75 }
+      try { await Store.add(png); $("toast").classList.add("on"); setTimeout(() => { $("toast").classList.remove("on"); ctx.clearRect(0, 0, cv.width, cv.height); hist = [snap()]; hi = 0; ui() }, 1800) }
+      catch (err) { console.error(err); alert("Could not send.\n" + (err && err.message ? err.message : err)); ui() }
+    };
+  </script>
+</body>
+
+</html>
