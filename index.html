@@ -118,7 +118,14 @@ $("bright").oninput=e=>{V=e.target.value/100;paint()};
 mark();syncSize();setColor(color);
 
 // ---- paper texture (what the writer sees is what gets sent)
-const KEEP_PAPER=true;   // true: the note keeps its paper look on the wall. false: only the ink is sent (transparent).
+const KEEP_PAPER=false;  // false: only the ink is sent, no background. true: the note keeps its paper look on the wall.
+const ADAPT_INK=true;    // with no background, dark ink is made light (same hue) so it shows on the dark wall.
+function lighten(c,w,h){const im=c.getImageData(0,0,w,h),d=im.data;
+  for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;const r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;if(l>=.5)continue;
+    const dd=mx-mn;let hh=0,s=0;if(dd){s=dd/(1-Math.abs(2*l-1));hh=mx===r?((g-b)/dd+6)%6:mx===g?(b-r)/dd+2:(r-g)/dd+4}
+    const L=1-l,C=(1-Math.abs(2*L-1))*s,X=C*(1-Math.abs(hh%2-1)),m=L-C/2,q=[[C,X,0],[X,C,0],[0,C,X],[0,X,C],[X,0,C],[C,0,X]][Math.floor(hh)%6];
+    d[i]=Math.round((q[0]+m)*255);d[i+1]=Math.round((q[1]+m)*255);d[i+2]=Math.round((q[2]+m)*255)}
+  c.putImageData(im,0,0)}
 let paperTex;
 function makePaper(w,h){
   const p=document.createElement("canvas");p.width=w;p.height=h;const x=p.getContext("2d");
@@ -207,6 +214,7 @@ $("save").onclick=async()=>{
   const t=document.createElement("canvas");t.width=w;t.height=h;const tc=t.getContext("2d");
   if(KEEP_PAPER)tc.drawImage(paperTex,x,y,w,h,0,0,w,h);
   tc.drawImage(cv,x,y,w,h,0,0,w,h);
+  if(!KEEP_PAPER&&ADAPT_INK)lighten(tc,w,h);
   let s=Math.min(1,700/w),png;
   for(let i=0;i<5;i++){const o=document.createElement("canvas");o.width=Math.max(1,Math.round(w*s));o.height=Math.max(1,Math.round(h*s));o.getContext("2d").drawImage(t,0,0,o.width,o.height);png=o.toDataURL(KEEP_PAPER?"image/jpeg":"image/png",.9);if(png.length<380000)break;s*=.75}
   try{await Store.add(png);$("toast").classList.add("on");setTimeout(()=>{$("toast").classList.remove("on");ctx.clearRect(0,0,cv.width,cv.height);hist=[snap()];hi=0;ui()},1800)}
