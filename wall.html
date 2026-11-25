@@ -1,23 +1,43 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Before I am</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@500;600&display=swap" rel="stylesheet">
-<style>html,body{margin:0;height:100%;background:#0d1020;overflow:hidden;cursor:none}canvas{display:block;width:100vw;height:100vh}</style></head><body>
+<style>
+  html,body{margin:0;height:100%;background:#0b0d14;overflow:hidden;cursor:none}
+  canvas{display:block;width:100vw;height:100vh}
+  @media (prefers-reduced-motion: reduce) {
+    canvas { animation: none !important; }
+  }
+</style></head><body>
 <canvas id="w"></canvas>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="config.js"></script><script src="store.js"></script>
 <script>
 const cv=document.getElementById("w"),ctx=cv.getContext("2d");
-const MAX=200,LANES=4,GAP=90,SPEED=0.4;          // SPEED = pixels per frame (at 60fps)
+const MAX=200,LANES=4,GAP=88,SPEED=0.4;          // SPEED = pixels per frame (at 60fps)
 let W,H,fs,band,mg,rowH,laneH;
 const lanes=Array.from({length:LANES},()=>({items:[]})),order=[];
 
 // Layout: 2 rows above the title, 2 below, with top/bottom margins so nothing is cut off or under the title.
-function geo(){fs=Math.min(W*.1,170);band=fs*1.3;mg=Math.max(30,H*.06);rowH=(H-2*mg-band)/4;laneH=Math.max(20,Math.min(rowH*.82,170))}
+function geo(){
+  fs=Math.min(W*0.09,160);
+  band=fs*1.25;
+  mg=Math.max(32,H*0.06);
+  rowH=(H-2*mg-band)/4;
+  laneH=Math.max(20,Math.min(rowH*0.82,160));
+}
 const laneY=i=>i<2?mg+rowH*(i+.5):H/2+band/2+rowH*(i-2+.5);
-function size(){const D=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);ctx.imageSmoothingQuality="high";geo();lanes.forEach(relayout)}
+function size(){
+  const D=devicePixelRatio||1;
+  W=innerWidth;H=innerHeight;
+  cv.width=W*D;cv.height=H*D;
+  ctx.setTransform(D,0,0,D,0,0);
+  ctx.imageSmoothingQuality="high";
+  ctx.textRendering="geometricPrecision";
+  geo();lanes.forEach(relayout);
+}
 function relayout(lane){                               // re-pack after a resize so nothing overlaps
   const its=lane.items.slice().sort((a,b)=>b.x-a.x);if(!its.length)return;
-  const x0=its[0].x;its.forEach(i=>{i.w=Math.min(laneH*i.a,W*.4);i.h=i.w/i.a});
+  const x0=its[0].x;its.forEach(i=>{i.w=Math.min(laneH*i.a,W*0.4);i.h=i.w/i.a});
   let R=x0+its[0].w;its.forEach(i=>{i.x=R-i.w;R=i.x-GAP});
 }
 addEventListener("resize",size);size();
@@ -56,8 +76,15 @@ function frame(now){
     for(const it of its)if(it.x+it.w>0&&it.x<W)ctx.drawImage(it.img,it.x,cy-it.h/2,it.w,it.h);
   });
 
-  ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";ctx.font=`italic 600 ${fs}px "Cormorant Garamond",Georgia,serif`;
-  ctx.shadowColor="#f3d98b";ctx.shadowBlur=40;ctx.fillStyle="#fffaf0";ctx.fillText("Before I am",W/2,H/2);ctx.restore();
+  ctx.save();
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.font=`italic 500 ${fs}px "Cormorant Garamond",Georgia,serif`;
+  ctx.shadowColor="rgba(0,0,0,0.6)";
+  ctx.shadowBlur=24;
+  ctx.fillStyle="#eef0f5";
+  ctx.fillText("Before I am",W/2,H/2);
+  ctx.restore();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
